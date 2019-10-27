@@ -44,7 +44,10 @@
 - Framework: Django / Flask
 - Tweet Scraping library: TBD
 
-*Facebook chosen for this project as it is the most popular social media
+##### d. Chatbot
+- Whatsapp
+
+*Twitter is chosen for this project as it is the most popular social media
 
 
 ### 2.4 How do we use those tools to achieve our goal?
