@@ -1,6 +1,4 @@
 # Stress-detecting-application #
-#### Singapore-India Hackathon ####
-
 
 ## 1. Problem identification
 ###  1.1  What exactly is the problem?
