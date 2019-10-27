@@ -1,0 +1,778 @@
+import datetime
+import json
+import tweepy
+import pytesseract
+import requests
+import urllib.request
+import cv2
+import datetime
+import numpy as np
+import requests
+import re
+
+from random import randint
+from PIL import Image
+from io import BytesIO
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.models import User
+from django.test import selenium
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.mail import send_mail
+from django.conf import settings
+from twilio.rest import Client
+
+from tweepy.streaming import StreamListener
+from tweepy import OAuthHandler, API, Stream
+from django_tables2.export.views import ExportMixin
+from django_tables2 import SingleTableMixin
+from django_filters.views import FilterView
+from background_task import background
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import authentication, permissions
+from django.views.generic import TemplateView
+from chartjs.views.lines import BaseLineChartView
+
+from .tables import StudentTable
+from .models import Student, Tweet, Profile, SelfHarmTweet
+from .filters import StudentFilter
+from .forms import NewStudentForm
+from .npl_engine.sentiment_analyser import SentimentAnalyser
+from .npl_engine.suicide_alert import get_self_harm
+
+
+consumer_key = 'Ktg8h5ZIHOnd4EHbTqC1Xpgob'
+consumer_secret = 'lBC0PvbMG7Wmm6h6CEcNof6iKMlciz82RugA3MaVk4PQzbwOrv'
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+
+endpoint = 'https://westcentralus.api.cognitive.microsoft.com/vision/v2.0'
+subscription_key = '21785f73119e4e4193676daf4e495b39'
+remote_image_url = "https://raw.githubusercontent.com/Azure-Samples/cognitive-services-sample-data-files/master/ComputerVision/Images/landmark.jpg"
+analyze_url = 'https://westcentralus.api.cognitive.microsoft.com/' + "vision/v2.0/analyze"
+
+headers = {'Ocp-Apim-Subscription-Key': '21785f73119e4e4193676daf4e495b39'}
+params = {'visualFeatures': 'Categories, Description, Color'}
+
+class FilteredStudentListView(LoginRequiredMixin, ExportMixin, SingleTableMixin, FilterView):
+    model = Student
+    table_class = StudentTable
+    filterset_class = StudentFilter
+    template_name = "dashboard/all_students.html"
+    paginate_by = 10
+
+    def get_queryset(self):
+        user = get_object_or_404(User, username=self.request.user.username)
+        return Student.objects.filter(caregiver=user).order_by('-updated_date')
+
+
+def classboard_test(request):
+    return render(request, 'dashboard/dashboard_testing.html')
+
+
+@login_required
+def search_student(request):
+    if request.method == 'POST':
+        search_name = request.POST['name'].strip('@').lower()
+        students = Student.objects.filter(name__icontains=search_name)
+        longer = len(students) // 3
+        students_longer = students[:3*longer]
+
+        three_students = []
+        three_students_groups = []
+        for student in students_longer:
+            three_students.append(student)
+            if len(three_students) == 3:
+                three_students_groups.append(tuple(three_students))
+                three_students = []
+        
+        less_than_three_groups = students[3*longer:]
+
+        two_remaining_students = len(less_than_three_groups) > 1
+
+        if two_remaining_students:
+            less_than_three_groups = [less_than_three_groups]
+
+        not_found = False
+        if len(students_longer) == len(less_than_three_groups) == 0:
+            not_found = True
+
+        # Get summary results
+        n_student = len(students)
+
+        bipo = 0
+        night = 0
+        nega = 0
+        s_harm = 0
+        t_tweet = 0
+        n_tweet = 0
+        sh_tweet = 0
+
+        for student in students:
+            if student.bipolarity:
+                bipo += 1
+            if student.timing:
+                night += 1
+            if student.consistent_negativity:
+                nega += 1
+            if student.suicidal:
+                s_harm += 1
+            
+            n_tweet += student.number_of_n_tweets
+            t_tweet += student.total_number_of_tweets
+            sh_tweet += student.number_of_sh_tweets
+
+        summary = {
+            'n_student': n_student,
+            'bipo': bipo,
+            'night': night,
+            'nega': nega,
+            's_harm': s_harm,
+            'n_tweet': n_tweet,
+            't_tweet': t_tweet,
+            'p_tweet': t_tweet - n_tweet,
+        }
+        profile = Profile.objects.filter(user=request.user)[0]
+
+        return render(request, 'dashboard/all_students.html', {'students': students, 
+                                                                'three_students_groups': three_students_groups, 
+                                                                'less_than_three_groups': less_than_three_groups,
+                                                                'two_remaining_students': two_remaining_students,
+                                                                'not_found': not_found,
+                                                                'summary': summary,
+                                                                'caregiver': profile,
+                                                                })
+    return redirect('all-students')
+
+
+@login_required
+def all_students(request):
+    students = Student.objects.filter(caregiver=request.user)
+    longer = len(students) // 3
+    students_longer = students[:3*longer]
+
+    three_students = []
+    three_students_groups = []
+    for student in students_longer:
+        three_students.append(student)
+        if len(three_students) == 3:
+            three_students_groups.append(tuple(three_students))
+            three_students = []
+
+    n_student = len(students)
+
+    bipo = 0
+    night = 0
+    nega = 0
+    s_harm = 0
+    t_tweet = 0
+    n_tweet = 0
+
+    for student in students:
+        if student.bipolarity:
+            bipo += 1
+        if student.timing:
+            night += 1
+        if student.consistent_negativity:
+            nega += 1
+        if student.suicidal:
+            s_harm += 1
+        
+        n_tweet += student.number_of_n_tweets
+        t_tweet += student.total_number_of_tweets
+
+    summary = {
+        'n_student': n_student,
+        'bipo': bipo,
+        'night': night,
+        'nega': nega,
+        's_harm': s_harm,
+        'n_tweet': n_tweet,
+        't_tweet': t_tweet,
+        'p_tweet': t_tweet - n_tweet,
+    }
+    
+    less_than_three_groups = students[3*longer:]
+
+    two_remaining_students = len(less_than_three_groups) > 1
+    if two_remaining_students:
+        less_than_three_groups = [less_than_three_groups]
+
+    not_found = False
+    if len(students_longer) == len(less_than_three_groups) == 0:
+        not_found = True
+
+    profile = Profile.objects.filter(user=request.user)[0]
+    return render(request, 'dashboard/all_students.html', {'students': students, 
+                                                                'three_students_groups': three_students_groups, 
+                                                                'less_than_three_groups': less_than_three_groups,
+                                                                'two_remaining_students': two_remaining_students,
+                                                                'not_found': not_found,
+                                                                'summary': summary,
+                                                                'caregiver': profile,
+                                                                })
+
+
+@login_required
+def student_detail(request, pk):
+    student = get_object_or_404(Student, pk=pk)
+    tweets = Tweet.objects.filter(student=student)
+    profile = Profile.objects.filter(user=request.user)[0]
+    return render(request, "dashboard/student_detail.html", {"student": student,
+                                                             "tweets": tweets, 
+                                                             'caregiver': profile,
+                                                             })
+
+
+def login(request):
+    if not request.user.is_authenticated:
+        return render(request, 'dashboard/login_grid.html')
+    else:
+        return redirect('login')
+
+
+@login_required
+def load_student(request):
+    if request.user.is_authenticated:
+        client = TwitterClient(request)
+        oauth_token, oauth_token_secret = client.get_oauth_tokens()
+        print('STARTED STREAMING')
+        stream_tweet(oauth_token, oauth_token_secret)
+
+    return redirect('all-students')
+
+
+@login_required
+def check_phone(request):
+    profile = Profile.objects.filter(user=request.user)
+<<<<<<< HEAD
+=======
+    load_student(request)
+>>>>>>> refs/remotes/origin/master
+    if len(profile) == 0:
+        Profile(user=request.user).save()
+        
+        return redirect('all-students')
+
+    return redirect('all-students')
+
+
+@login_required
+def enter_phone(request):
+    phone = request.POST['phone'].strip('+')
+    print(phone)
+    if not phone.isnumeric():
+        return redirect('all-students')
+
+    else: 
+        profile = Profile.objects.filter(user=request.user)[0]
+        profile.phone = phone
+        profile.save()
+    
+        return redirect('all-students')
+
+
+
+@login_required
+def enter_email(request):
+    email = request.POST['email'].strip('+')
+
+    if check_email(email):
+        profile = Profile.objects.filter(user=request.user)[0]        
+        profile.user.email = email
+        profile.user.save()
+        return redirect('all-students')
+
+    else: 
+        return redirect('all-students')
+
+
+@login_required
+def update_receive_m(request):
+    profile = Profile.objects.filter(user=request.user)[0]
+    profile.receive_message = not profile.receive_message
+    profile.save()
+    return redirect('all-students')
+
+
+@login_required
+def update_receive_e(request):
+    profile = Profile.objects.filter(user=request.user)[0]
+    profile.receive_email = not profile.receive_email
+    profile.save()
+    return redirect('all-students')
+
+
+@login_required
+def redirect_twitter(request, account):
+    return redirect('https://twitter.com/' + account)
+
+
+@login_required
+def delete_student(request, pk):
+    Student.objects.filter(id=pk).delete()
+    return redirect('all-students')
+
+
+@login_required
+def add_student(request):
+    if request.method == 'POST':
+        form = NewStudentForm(request.POST)
+
+        if form.is_valid():
+            twitter_account = request.POST['name'].strip('@').lower()
+
+            if not Student.objects.filter(twitter_account=twitter_account).count() > 0:
+                api = get_api(request)
+                try:
+                    new_student = api.lookup_users(screen_names=[twitter_account])[0]._json
+
+                    Student(name=new_student['name'],
+                            uid=new_student['id'],
+                            twitter_account=new_student['screen_name'].lower(),
+                            caregiver=request.user).save()
+
+                    print(f'added {twitter_account}!')
+
+                    load_tweet(new_student['screen_name'], api)
+                    print('getting update status')
+                    get_update_status(request)
+
+                except Exception as e:
+                    # Do something here
+                    print('WARNING: EXCEPTION RAISED')
+                    print(e)
+                    return redirect('all-students')
+        else:
+            # Do something here
+            pass
+
+    return redirect('all-students')
+
+
+def get_post_date_time(data):
+    table = {'Jan':1, 'Feb':2, 'Mar':3, 'Apr':4, 'May':5, 'Jun':6,
+                'Jul':7, 'Aug':8, 'Sep':9, 'Oct':10, 'Nov':11, 'Dec':12}
+    ts = data['created_at'].split(' ')
+    time = ts[3].split(':')
+
+    return datetime.datetime(year=int(ts[5]), month=table[ts[1]], day=int(ts[2]), 
+                            hour=int(time[0]), minute=int(time[1]), second=int(time[2]))
+    
+
+class TwitterClient(object):
+    def __init__(self, request):
+        self.consumer_key = 'Ktg8h5ZIHOnd4EHbTqC1Xpgob'
+        self.consumer_secret = 'lBC0PvbMG7Wmm6h6CEcNof6iKMlciz82RugA3MaVk4PQzbwOrv'
+        self.access_token = request.user.social_auth.get().extra_data['access_token']
+        
+    def get_oauth_tokens(self):
+        oauth_token = self.access_token['oauth_token']
+        oauth_token_secret = self.access_token['oauth_token_secret']
+        return oauth_token, oauth_token_secret
+
+    def get_auth(self):
+        return tweepy.OAuthHandler(self.consumer_key, \
+                                    self.consumer_secret).set_access_token(\
+                                        self.access_token['oauth_token'], \
+                                        self.access_token['oauth_token_secret'])
+
+
+class TweetListener(StreamListener):
+    def __init__(self):
+        StreamListener.__init__(self)
+        self.analyser = SentimentAnalyser()
+
+    def on_error(self, status_code):
+        print(status_code)
+        return False
+
+    def on_data(self, raw_data):
+        data = json.loads(raw_data)
+        print(data)
+        save_tweet(self.analyser, data)
+
+
+def load_tweet(screen_name, api):
+    analyzer = SentimentAnalyser()
+
+    for status in tweepy.Cursor(api.user_timeline, screen_name=screen_name).items():
+        data = status._json
+        posted_date_time = get_post_date_time(data)
+        time_delta = datetime.date.today() - posted_date_time.date()
+
+        if time_delta.days > 2:
+            break
+        
+        if not Tweet.objects.filter(posted_date=posted_date_time).count() > 0:
+            save_tweet(analyzer, data)
+
+
+def save_tweet(analyzer, data):
+    if not is_delete(data):
+        if is_retweet(data):
+            text, media, student = extract_data_retweet(data)
+        else:
+            text, media, student, url_ = extract_data(data)
+
+        ocr_res = ''
+        media_status = None
+        if media is not None:
+            with urllib.request.urlopen(media) as url:
+                image_np = np.asarray(bytearray(url.read()), dtype="uint8")
+                image = cv2.imdecode(image_np, cv2.IMREAD_GRAYSCALE)
+            # ocr_res = pytesseract.image_to_string(image, lang='eng', config='--oem 1 --psm 3')
+            # print('================OCR RESULT================', '\n')
+
+            ocr_res = get_ocr(media)
+            print(ocr_res)
+
+            # api_endpoint = 'http://0.0.0.0:3333/'
+            # media_ = {'media': media}
+            # media_status = not bool(requests.post(url=api_endpoint, data=media_).content)
+            media_status = get_image_sentiment(media)
+            
+            # true: not depressed
+            print('================IMAGE SENTIMENT RESULT================', '\n')
+            print('Depressed: ' + str(not media_status), '\n')
+
+        
+
+        print('================TEXT ANALYZER RESULT================', '\n')
+        text = text.strip(url_) + ' ' + ocr_res
+        text_status = analyzer.predict(text)
+        print('Depressed: ' + str(not text_status), '\n')
+        
+        if media:
+            overall_status = text_status or media_status
+        else: 
+            overall_status = text_status
+        
+        posted_date = get_post_date_time(data)
+
+        tokens = analyzer.tokenized_text
+
+        s_harm = get_self_harm(tokens)
+
+        new_tweet = Tweet(text=text, media=media, student=student, 
+                text_status=text_status, posted_date=posted_date, 
+                media_status=media_status, overall_status=overall_status,
+                s_harm=s_harm)
+        
+        new_tweet.save()
+        student.total_number_of_tweets += 1
+
+        if not overall_status:
+            student.number_of_n_tweets += 1
+
+        if s_harm:
+            SelfHarmTweet(tweet=new_tweet, student=student).save()
+            profile = Profile.objects.filter(user=student.caregiver)[0]
+            student.suicidal = True
+            student.number_of_sh_tweets += 1
+            send_whatsapp_alert(student_name=student.name, tweet=text, phone=profile.phone)
+        
+        student.save()
+        print(f'Added a new tweet from {student.twitter_account}!')
+
+
+def is_delete(data):
+    try:
+        data['delete']
+        return True
+    except:
+        return False
+
+
+def is_retweet(data):
+    try:
+        data['retweeted_status']
+        return True
+    except:
+        return False
+
+
+def extract_data(data):
+    try:
+        text = data['extended_tweet']['full_text']
+        try:
+            # If video available
+            media = data['extended_tweet']['extended_entities']['media'][0]['video_info']['variants'][0]
+        except:
+            try:
+                # If image available
+                media = data['extended_tweet']['extended_entities']['media'][0]['media_url']
+                try:
+                    url = data['extended_tweet']['extended_entities']['media'][0]['url']
+                except:
+                    url = None
+            except:
+                media = None
+    except:
+        text = data['text']
+        try:
+            # If video available
+            media = data['entities']['media'][0]['media_url']
+            try:
+                url = data['entities']['media'][0]['url']
+            except:
+                url = None
+        except:
+            media = None
+
+    twitter_account = data['user']['screen_name'].lower()
+
+    student = None
+    try:
+        student = Student.objects.filter(twitter_account=twitter_account)[0]
+    except:
+        print(twitter_account, '\n')
+
+    return text, media, student, url
+
+
+def extract_data_retweet(data):
+    text, media, _ = extract_data(data['retweeted_status'])
+    twitter_account = data['user']['screen_name'].lower()
+    student = Student.objects.filter(twitter_account=twitter_account)[0]
+
+    return text, media, student
+
+
+def update_timing_score(tweets, student):
+    before_three_am = datetime.time(3, 0, 0)
+    after_eleven_pm = datetime.time(23, 0, 0)
+    
+    count = 0
+    for tweet in tweets:
+        if before_three_am > tweet.posted_date.time() > after_eleven_pm:
+            count += 1
+    
+    student.timing = count / len(tweets) > 0.5
+    student.save()
+
+
+# def update_frequency(tweets, student):
+#     # a percentage representation of the number of depressed tweets sent by a person over their history
+#     count = 0
+#     for tweet in tweets:
+#         if tweet.text_status:
+#             count += 1
+#     # mean frequency update everytime
+#     if student.mean_frequency_score == 0:
+#         student.mean_frequency_score = count / len(tweets)
+#     else:
+#         student.has_frequency_changed = count / len(tweets) > student.mean_frequency_score
+#         student.mean_frequency_score = (student.mean_frequency_score * student.total_number_of_tweets + count) / student.total_number_of_tweets
+#         student.save()
+
+
+def update_is_consistently_negative(tweets, student, alpha=0.9, threshold=0.5):
+    """ Latest tweets first , older posts are valued less"""
+    combined_sentiment = [int(tweet.overall_status) for tweet in tweets]
+
+    consistently_pos = sum([(alpha ** i) * sentiment for i, sentiment in
+                            enumerate(combined_sentiment)]) / sum(
+        [alpha ** i for i in range(len(combined_sentiment))])
+    
+    # print(student.consistent_negativity, consistently_pos)
+    student.consistent_negativity = (1 - consistently_pos) >= threshold
+    student.save()
+
+
+def update_is_bipolar(tweets, student, threshold=0.3):
+    """ Latest tweets first"""
+    combined_sentiment = [int(tweet.overall_status) for tweet in tweets]
+    print(combined_sentiment)
+    changes = [abs(combined_sentiment[i] - combined_sentiment[i + 1]) for i in range(len(combined_sentiment) - 1)]
+
+    if len(changes) > 0:
+        student.bipolarity = sum(changes) / len(changes) >= threshold
+    student.save()
+
+
+def get_total_tweets(student):
+    student.total_number_of_tweets = len(Tweet.objects.filter(student=student))
+    return student.total_number_of_tweets
+
+
+def get_last_twenty_four_hours(student):
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    two_days_ago = tomorrow - datetime.timedelta(days=3)
+
+    return Tweet.objects.filter(student=student, posted_date__range=[two_days_ago, tomorrow])
+
+
+@background(schedule = 60 * 60 * 24)
+def daily_status_update(request):
+    get_update_status(request)
+
+
+# @background(schedule=10)
+def get_update_status(request):
+    print('getting update status')
+    students = Student.objects.filter(caregiver=request.user)
+    for student in students:
+        tweets = get_last_twenty_four_hours(student)
+  
+        if len(tweets) > 0:
+            update_timing_score(tweets, student)    
+            update_is_consistently_negative(tweets, student)   
+            update_is_bipolar(tweets, student)
+            if (student.bipolarity + student.consistent_negativity + student.timing + student.suicidal) > 0:
+                symptoms = []
+                symptoms_ = ['bipolarity', 'consistent negativity', 'late night activity', 'suicidal thoughts']
+                symptom_res = [student.bipolarity, student.consistent_negativity, student.timing, student.suicidal]
+                for i, j in zip(symptoms_, symptom_res):
+                    if j:
+                        symptoms.append(i)
+
+                profile = Profile.objects.filter(user=request.user)[0]
+                if profile.receive_email:
+                    if profile.email:
+                        send_email_alert(symptoms, email)
+                        print('Sent email!')
+
+                if profile.receive_message:
+                    if profile.phone:
+                        send_whatsapp(symptoms, profile.phone)
+                        print('Sent message!')
+
+
+@background(schedule=0)
+def stream_tweet(oauth_token, oauth_token_secret):
+    auth.set_access_token(oauth_token, oauth_token_secret)
+    tweet_listener = TweetListener()
+    twitterStream = Stream(auth, tweet_listener)
+    twitterStream.filter(follow=['1034890443291611138', '1097094619014168576'])
+
+
+def get_api(request):
+    access_token = request.user.social_auth.get().extra_data['access_token']
+    oauth_token = access_token['oauth_token']
+    oauth_token_secret = access_token['oauth_token_secret']
+    auth.set_access_token(oauth_token, oauth_token_secret)
+    return tweepy.API(auth)
+
+
+class ChartData(APIView):
+    authentication_classes = []  
+    permission_classes = []
+    def get(self, request, format=None):
+        data = {
+            "Depressed": 40,
+            "Neutral": 30,
+            "Happy": 30,
+        }
+        return Response(data)
+
+
+class LineChartJSONView(BaseLineChartView):
+    def get_labels(self):
+        return ["January", "February", "March", "April", "May", "June", "July"]
+
+    def get_providers(self):
+        return ["Central", "Eastside", "Westside"]
+
+    def get_data(self):
+        return [[75, 44, 92, 11, 44, 95, 35],
+                [41, 92, 18, 3, 73, 87, 92],
+                [87, 21, 94, 3, 90, 13, 65]]
+
+
+def send_email_alert(symptoms, email):
+    subject = '[Team 9]'
+    message = 'Your boy has symptom(s) of'
+    for symptom in symptoms:
+        message += f' {symptom},'
+
+    message = message[:-1] + '.'
+    
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [email]
+    send_mail(subject, message, email_from, recipient_list)
+
+
+line_chart = TemplateView.as_view(template_name='dashboard/chart.html')
+line_chart_json = LineChartJSONView.as_view()
+
+
+def send_whatsapp(symptoms):
+    client = Client()
+    message = 'fuck u'
+    for symptom in symptoms:
+        message += f' {symptom},'
+
+    message = message[:-1] + '.'
+
+    FROM_WHATSAPP_NUMBER = "whatsapp:+14155238886"
+    TO_WHATSAPP_NUMBER = "whatsapp:+6594516277"
+
+    client.messages.create(body=message,
+                           from_=FROM_WHATSAPP_NUMBER,
+                           to=TO_WHATSAPP_NUMBER)
+
+
+def send_whatsapp_alert(student_name, tweet, phone, verbose=True):
+    # kane:+65 94516277, giang:+65 94684096
+    sid = 'AC85c805c874b2a1d1873ab9d612b6edcd'
+    token = 'fc304b959047553288136fed2f57447d'
+    FROM_WHATSAPP_NUMBER = "whatsapp:+14155238886"
+    TO_WHATSAPP_NUMBER = f"whatsapp:+{phone}"
+    # TO_WHATSAPP_NUMBER = "whatsapp:+6594516277"
+
+    message = f'[Team 9] {student_name}\'s lastest tweet shows signs of self-harm:\n"{tweet}"'
+ 
+    client = Client(sid, token)
+    client.messages.create(body=message,
+                           from_=FROM_WHATSAPP_NUMBER,
+                           to=TO_WHATSAPP_NUMBER)
+    if verbose:
+        print('Sent alert message!')
+
+
+def check_email(email): 
+    if(re.search('^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$', email)):  
+        return True
+    else:
+        return False
+
+
+def get_ocr(media):
+    analyze_url = 'https://westcentralus.api.cognitive.microsoft.com/' + "vision/v2.0/ocr"
+    headers = {'Ocp-Apim-Subscription-Key': subscription_key}
+    params = {'language': 'en', 'detectOrientation': 'true'}
+    media_ = {'url': media}
+    response = requests.post(analyze_url, headers=headers,
+                            params=params, json=media_)
+
+    response.raise_for_status()
+    res = response.json()
+
+    full_text = ''
+    for line in res['regions'][0]['lines']:
+        words = line['words']
+        for word in words:
+            full_text += word['text'] + ' '
+
+    return full_text
+    
+
+def get_image_sentiment(media):
+    media_ = {'url': media}
+    analyze_url = 'https://westcentralus.api.cognitive.microsoft.com/' + "vision/v2.0/analyze"
+    headers = {'Ocp-Apim-Subscription-Key': '21785f73119e4e4193676daf4e495b39'}
+    params = {'visualFeatures': 'Categories, Description, Color'}
+    
+    response = requests.post(analyze_url, headers=headers,
+                    params=params, json=media_)
+
+    analysis = response.json()
+
+    if 'Black' in analysis['color']['dominantColors'] or 'Grey' in analysis['color']['dominantColors']:
+        media_status = False
+    else:
+        media_status = True
+
+    return media_status

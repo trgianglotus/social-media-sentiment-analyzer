@@ -1,0 +1,518 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block bodycontent %}
+<section class=''>
+		<div class='container-fluid'>
+			<ul class="nav nav-tabsx " >
+				<li class="active" id="myTab">
+					<!-- <a href="{% url 'all-students' %}" data-toggle="tab">
+						Students
+					</a> -->
+					<button class="tablinks active" onclick="openCity(event, 'students')">Students</button>
+
+				</li>
+				<li>
+					<!-- <a href="#tab_default_2" data-toggle="tab">
+						Statistics
+					</a> -->
+					<button class="tablinks" onclick="openCity(event, 'statistics')">Summary</button>
+
+				</li>
+			</ul>
+		</div>	  
+		<div id="students" class="tabcontent">
+				{% if not_found %}
+		<div class="grid grid--effect-vega">
+			<h1>No results found</h1>
+		</div>
+	{% else %}
+		{% for student1, student2, student3 in three_students_groups %}
+			<div class="grid grid--effect-vega">
+				<a href="{% url 'student-detail' pk=student1.pk %}" class="grid__item grid__item--c1">
+					<div class="stack">
+						<!-- <div class="stack__deco"></div>
+						<div class="stack__deco"></div>
+						<div class="stack__deco"></div>
+						<div class="stack__deco"></div> -->
+						<div class="stack__figure">
+							<img class="stack__img" src="{% static 'dashboard/img/1.png' %}" alt="Image"/>
+						</div>
+					</div>
+					<div class="grid__item-caption">
+						<h3 class="grid__item-title">{{ student1.name }}</h3>
+						<div class="column column--left">
+							{% if student1.bipolarity %}
+								<span class="column__text ">Bipolarity</span>
+							{% else %}
+								<span class="column__text_false ">Bipolarity</span>
+							{% endif %}
+
+							{% if student1.timing %}
+								<span class="column__text ">Night activity</span>
+							{% else %}
+								<span class="column__text_false ">Night activity</span>
+							{% endif %}
+
+							{% if student1.consistent_negativity %}
+								<span class="column__text ">Negativity</span>
+							{% else %}
+								<span class="column__text_false ">Negativity</span>
+							{% endif %}
+
+							{% if student1.suicidal %}
+								<span class="column__text ">Self-harm</span>
+							{% else %}
+								<span class="column__text_false ">Self-harm</span>
+							{% endif %}
+						</div>
+						<div class="column column--right">
+							{% if student1.bipolarity %}
+								<span class="column__text">{{ student1.bipolarity }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student1.bipolarity }}</span>
+							{% endif %}
+
+							{% if student1.timing %}
+								<span class="column__text ">{{ student1.timing }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student1.timing }}</span>
+							{% endif %}
+
+							{% if student1.consistent_negativity %}
+								<span class="column__text ">{{ student1.consistent_negativity }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student1.consistent_negativity }}</span>
+							{% endif %}
+
+							{% if student1.suicidal %}
+								<span class="column__text ">{{ student1.suicidal }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student1.suicidal }}</span>
+							{% endif %}
+						</div>
+					</div>
+				</a>
+				<a href="#" class="grid__item grid__item--c2">
+						<div class="stack">
+							<!-- <div class="stack__deco"></div>
+							<div class="stack__deco"></div>
+							<div class="stack__deco"></div>
+							<div class="stack__deco"></div> -->
+							<div class="stack__figure">
+								<img class="stack__img" src="{% static 'dashboard/img/2.png' %}" alt="Image"/>
+							</div>
+						</div>
+						<div class="grid__item-caption">
+								
+						<h3 class="grid__item-title">{{ student2.name }}</h3>
+						<div class="column column--left">
+								{% if student2.bipolarity %}
+								<span class="column__text ">Bipolarity</span>
+							{% else %}
+								<span class="column__text_false ">Bipolarity</span>
+							{% endif %}
+
+							{% if student2.timing %}
+								<span class="column__text ">Night activity</span>
+							{% else %}
+								<span class="column__text_false ">Night activity</span>
+							{% endif %}
+
+							{% if student2.consistent_negativity %}
+								<span class="column__text ">Negativity</span>
+							{% else %}
+								<span class="column__text_false ">Negativity</span>
+							{% endif %}
+
+							{% if student2.suicidal %}
+								<span class="column__text ">Self-harm</span>
+							{% else %}
+								<span class="column__text_false ">Self-harm</span>
+							{% endif %}
+						</div>
+
+						<div class="column column--right">
+								{% if student2.bipolarity %}
+								<span class="column__text">{{ student2.bipolarity }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student2.bipolarity }}</span>
+							{% endif %}
+
+							{% if student2.timing %}
+								<span class="column__text ">{{ student2.timing }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student2.timing }}</span>
+							{% endif %}
+
+							{% if student2.consistent_negativity %}
+								<span class="column__text ">{{ student2.consistent_negativity }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student2.consistent_negativity }}</span>
+							{% endif %}
+
+							{% if student2.suicidal %}
+								<span class="column__text ">{{ student2.suicidal }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student2.suicidal }}</span>
+							{% endif %}
+						</div>
+						</div>
+				</a>
+				<a href="#" class="grid__item grid__item--c3">
+						<div class="stack">
+							<!-- <div class="stack__deco"></div>
+							<div class="stack__deco"></div>
+							<div class="stack__deco"></div>
+							<div class="stack__deco"></div> -->
+							<div class="stack__figure">
+								<img class="stack__img" src="{% static 'dashboard/img/3.png' %}" alt="Image"/>
+							</div>
+						</div>
+						<div class="grid__item-caption">
+							
+						<h3 class="grid__item-title">{{ student3.name }}</h3>
+						<div class="column column--left">
+							{% if student3.bipolarity %}
+								<span class="column__text ">Bipolarity</span>
+							{% else %}
+								<span class="column__text_false ">Bipolarity</span>
+							{% endif %}
+
+							{% if student3.timing %}
+								<span class="column__text ">Night activity</span>
+							{% else %}
+								<span class="column__text_false ">Night activity</span>
+							{% endif %}
+
+							{% if student3.consistent_negativity %}
+								<span class="column__text ">Negativity</span>
+							{% else %}
+								<span class="column__text_false ">Negativity</span>
+							{% endif %}
+
+							{% if student3.suicidal %}
+								<span class="column__text ">Self-harm</span>
+							{% else %}
+								<span class="column__text_false ">Self-harm</span>
+							{% endif %}
+						</div>
+
+						<div class="column column--right">
+							{% if student1.bipolarity %}
+								<span class="column__text">{{ student3.bipolarity }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student3.bipolarity }}</span>
+							{% endif %}
+
+							{% if student1.timing %}
+								<span class="column__text ">{{ student3.timing }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student3.timing }}</span>
+							{% endif %}
+
+							{% if student3.consistent_negativity %}
+								<span class="column__text ">{{ student3.consistent_negativity }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student3.consistent_negativity }}</span>
+							{% endif %}
+
+							{% if student3.suicidal %}
+								<span class="column__text ">{{ student3.suicidal }}</span>
+							{% else %}
+								<span class="column__text_false ">{{ student3.suicidal }}</span>
+							{% endif %}
+						</div>
+					</div>
+				</a>
+			</div>
+		{% endfor %}
+
+		{% if two_remaining_students %}
+			{% for student1, student2 in less_than_three_groups %}
+				<div class="grid grid--effect-vega">
+					<a href="#" class="grid__item grid__item--c1">
+						<div class="stack">
+							<!-- <div class="stack__deco"></div>
+							<div class="stack__deco"></div>
+							<div class="stack__deco"></div>
+							<div class="stack__deco"></div> -->
+							<div class="stack__figure">
+								<img class="stack__img" src="{% static 'dashboard/img/positive.png' %}" alt="Image"/>
+						</div>
+						</div>
+							<div class="grid__item-caption">
+								<h3 class="grid__item-title">{{ student1.name }}</h3>
+								<div class="column column--left">
+									{% if student1.bipolarity %}
+										<span class="column__text ">Bipolarity</span>
+									{% else %}
+										<span class="column__text_false ">Bipolarity</span>
+									{% endif %}
+
+									{% if student1.timing %}
+										<span class="column__text ">Night activity</span>
+									{% else %}
+										<span class="column__text_false ">Night activity</span>
+									{% endif %}
+
+									{% if student1.consistent_negativity %}
+										<span class="column__text ">Negativity</span>
+									{% else %}
+										<span class="column__text_false ">Negativity</span>
+									{% endif %}
+
+									{% if student1.suicidal %}
+										<span class="column__text ">Self-harm</span>
+									{% else %}
+										<span class="column__text_false ">Self-harm</span>
+									{% endif %}
+								</div>
+								<div class="column column--right">
+									{% if student1.bipolarity %}
+										<span class="column__text">{{ student1.bipolarity }}</span>
+									{% else %}
+										<span class="column__text_false ">{{ student1.bipolarity }}</span>
+									{% endif %}
+
+									{% if student1.timing %}
+										<span class="column__text ">{{ student1.timing }}</span>
+									{% else %}
+										<span class="column__text_false ">{{ student1.timing }}</span>
+									{% endif %}
+
+									{% if student1.consistent_negativity %}
+										<span class="column__text ">{{ student1.consistent_negativity }}</span>
+									{% else %}
+										<span class="column__text_false ">{{ student1.consistent_negativity }}</span>
+									{% endif %}
+
+									{% if student1.suicidal %}
+										<span class="column__text ">{{ student1.suicidal }}</span>
+									{% else %}
+										<span class="column__text_false ">{{ student1.suicidal }}</span>
+									{% endif %}
+								</div>
+							</div>
+					</a>
+					<a href="#" class="grid__item grid__item--c2">
+							<div class="stack">
+								<!-- <div class="stack__deco"></div>
+								<div class="stack__deco"></div>
+								<div class="stack__deco"></div>
+								<div class="stack__deco"></div> -->
+								<div class="stack__figure">
+									<img class="stack__img" src="{% static 'dashboard/img/2.png' %}" alt="Image"/>
+								</div>
+							</div>
+							<div class="grid__item-caption">
+									
+							<h3 class="grid__item-title">{{ student2.name }}</h3>
+							<div class="column column--left">
+									{% if student2.bipolarity %}
+									<span class="column__text ">Bipolarity</span>
+								{% else %}
+									<span class="column__text_false ">Bipolarity</span>
+								{% endif %}
+
+								{% if student2.timing %}
+									<span class="column__text ">Night activity</span>
+								{% else %}
+									<span class="column__text_false ">Night activity</span>
+								{% endif %}
+
+								{% if student2.consistent_negativity %}
+									<span class="column__text ">Negativity</span>
+								{% else %}
+									<span class="column__text_false ">Negativity</span>
+								{% endif %}
+
+								{% if student2.suicidal %}
+									<span class="column__text ">Self-harm</span>
+								{% else %}
+									<span class="column__text_false ">Self-harm</span>
+								{% endif %}
+							</div>
+
+							<div class="column column--right">
+									{% if student2.bipolarity %}
+									<span class="column__text">{{ student2.bipolarity }}</span>
+								{% else %}
+									<span class="column__text_false ">{{ student2.bipolarity }}</span>
+								{% endif %}
+
+								{% if student2.timing %}
+									<span class="column__text ">{{ student2.timing }}</span>
+								{% else %}
+									<span class="column__text_false ">{{ student2.timing }}</span>
+								{% endif %}
+
+								{% if student2.consistent_negativity %}
+									<span class="column__text ">{{ student2.consistent_negativity }}</span>
+								{% else %}
+									<span class="column__text_false ">{{ student2.consistent_negativity }}</span>
+								{% endif %}
+
+								{% if student2.suicidal %}
+									<span class="column__text ">{{ student2.suicidal }}</span>
+								{% else %}
+									<span class="column__text_false ">{{ student2.suicidal }}</span>
+								{% endif %}
+							</div>
+						</div>
+					</a>
+				</div>
+			{% endfor %}	  
+		{% else %}
+			{% for student1 in less_than_three_groups %}
+				<div class="grid grid--effect-vega">
+						<a href="#" class="grid__item grid__item--c1">
+							<div class="stack">
+								<!-- <div class="stack__deco"></div>
+								<div class="stack__deco"></div>
+								<div class="stack__deco"></div>
+								<div class="stack__deco"></div> -->
+								<div class="stack__figure">
+									<img class="stack__img" src="{% static 'dashboard/img/2.png' %}" alt="Image"/>
+								</div>
+							</div>
+							<div class="grid__item-caption">
+								<h3 class="grid__item-title">{{ student1.name }}</h3>
+								<div class="column column--left">
+									{% if student1.bipolarity %}
+										<span class="column__text ">Bipolarity</span>
+									{% else %}
+										<span class="column__text_false ">Bipolarity</span>
+									{% endif %}
+
+									{% if student1.timing %}
+										<span class="column__text ">Night activity</span>
+									{% else %}
+										<span class="column__text_false ">Night activity</span>
+									{% endif %}
+
+									{% if student1.consistent_negativity %}
+										<span class="column__text ">Negativity</span>
+									{% else %}
+										<span class="column__text_false ">Negativity</span>
+									{% endif %}
+
+									{% if student1.suicidal %}
+										<span class="column__text ">Self-harm</span>
+									{% else %}
+										<span class="column__text_false ">Self-harm</span>
+									{% endif %}
+								</div>
+								<div class="column column--right">
+									{% if student1.bipolarity %}
+										<span class="column__text">{{ student1.bipolarity }}</span>
+									{% else %}
+										<span class="column__text_false ">{{ student1.bipolarity }}</span>
+									{% endif %}
+
+									{% if student1.timing %}
+										<span class="column__text ">{{ student1.timing }}</span>
+									{% else %}
+										<span class="column__text_false ">{{ student1.timing }}</span>
+									{% endif %}
+
+									{% if student1.consistent_negativity %}
+										<span class="column__text ">{{ student1.consistent_negativity }}</span>
+									{% else %}
+										<span class="column__text_false ">{{ student1.consistent_negativity }}</span>
+									{% endif %}
+
+									{% if student1.suicidal %}
+										<span class="column__text ">{{ student1.suicidal }}</span>
+									{% else %}
+										<span class="column__text_false ">{{ student1.suicidal }}</span>
+									{% endif %}
+								</div>
+							</div>
+						</a>		
+				</div>
+			{% endfor %}
+		{% endif %}
+	{% endif %}
+		</div>
+		<div id="statistics" class="tabcontent">
+				<div class="container-fluid">
+						<div class="row" style="margin-top: 7vh">
+							<div class="col-xs-1 col-sm-1 col-md-1" ></div>
+						<div class="col-md-3" >	
+							<h4></h4>
+						</div>
+						<div class="col-xs-9 col-sm-6 col-md-4" >
+							<p>Total number of students</p>
+							<p>Bipolarity</p>
+							<p>Late night activities</p>
+							<p>Consistent negativity</p>
+							<p>Signs of self-harm</p>
+						</div>
+						<div class="col-xs-2 col-md-2" >	
+							<p>{{ summary.n_student }}</p>
+							<p>{{ summary.bipo }}</p>
+							<p>{{ summary.night }}</p>
+							<p>{{ summary.nega }}</p>
+							<p>{{ summary.s_harm }}</p>
+						</div>
+							
+						</div>
+						<div class="row" style="margin-top: 7vh">
+				
+								<div class="col-xs-1 col-sm-1 col-md-1" ></div>
+								<div class="col-md-3" >	
+									<h4></h4>
+								</div>
+								<div class="col-xs-9 col-sm-6 col-md-4" >
+									<p>Total number of tweets</p>
+									<p>Negative tweets</p>
+									<p>Neutral tweets</p>
+									<p>Self-harm tweets</p>	
+								</div>
+								<div class="col-xs-2 col-md-2" >
+									<p>{{ summary.t_tweet }}</p>	
+									<p>{{ summary.n_tweet }}</p>	
+									<p>{{ summary.p_tweet }}</p>	
+									<p>0</p>	
+								</div>
+						</div>
+				
+						<div class="row" style="margin-top: 12vh">
+				
+								<div class="col-xs-1 col-sm-1 col-md-1" ></div>
+									<div class="col-md-3" >	
+										<h4></h4>
+									</div>
+								
+				
+								<div class="col-md-3" >
+										<div class="chart-container" >
+											<canvas id="myChart" style="max-height:50vw; max-width: 50vw;"></canvas>
+										</div>
+								</div>
+						
+									<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+									<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+						</div>
+				
+						
+				
+				
+					</div>
+		</div>
+		<script>
+				document.getElementById("statistics").style.display = "none";
+			</script>
+</section>
+{% endblock bodycontent %}
+<!-- {% block students %}
+
+{% endblock students %}
+
+
+{% block statistics %}
+	
+{% endblock statistics %}
+  
+	 -->

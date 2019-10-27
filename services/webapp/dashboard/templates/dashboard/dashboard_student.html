@@ -1,0 +1,326 @@
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Dashboard - {{ student.name }}</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Droid+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'dashboard/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/css/test.css' %}">
+  </head>
+  <style>
+  </style>
+  <body>
+    <aside class="side-nav" id="show-side-navigation1">
+      <i class="fa fa-bars close-aside hidden-sm hidden-md hidden-lg" data-close="show-side-navigation1"></i>
+        
+        <div class="heading">
+          <div class="info">
+            <h3><a href="#">@{{ student.twitter_account }}</a></h3>
+            <p>{{ student.name }}</p>
+          </div>
+        </div>
+      
+      <ul class="categories">
+
+        <li><i class="fa fa-home fa-fw" aria-hidden="true"></i><a href="{% url 'classifier' %}"> Home </a></li>
+
+        <!-- <li><i class="fa fa-info-circle fa-fw"></i><a href="#"> About </a></li> -->
+        
+        <li><i class="fa fa-gear fa-fw"></i><a href="#"> Settings </a>
+          <ul class="side-nav-dropdown">
+            <li><a href="{% url 'delete-student' student.pk %}">Delete student</a></li>
+          </ul>
+        </li>
+      </ul>
+    </aside>
+
+    <a href="#"><i data-show='show-side-navigation1' class="fa fa-bars show-side-btn"></i></a>
+
+    <section id="contents">
+      
+      <div class="welcome">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="content">
+                <h2>Welcome to Dashboard</h2>
+                <p>Sentiment Analysis</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section class='statis text-center'>
+          <div class="container-fluid">
+            <div class="row">
+  
+              <div class="col-md-3">
+                <div class="box bg-primary">
+                    <i class="fa fa-arrows-v"></i>
+                    <h3>{{ student.bipolarity }}</h3>
+                    <p class="lead">Bipolarity</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="box danger">
+                  <i class="fa fa-minus"></i>
+                  <h3 style="color: #fff">{{ student.consistent_negativity }}</h3>
+                  <p class="lead">Negativity</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="box warning">
+                  <i class="fa fa-moon-o"></i>
+                  <h3>{{ student.timing }}</h3>
+                  <p class="lead">Night Actitity</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="box success">
+                  <i class="fa fa-bomb"></i>
+                  <h3>{{ student.suicidal }}</h3>
+                  <p class="lead">Self Harm</p>
+                </div>
+              </div>
+  
+            </div>
+          </div>
+        </section>
+      <section class="statistics">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="box">
+                <i class="fa fa-twitter fa-fw bg-primary"></i>
+                <div class="info">
+                  <h3 h1>{{ student.total_number_of_tweets }}</h3> <span>Tweets</span>
+                  <p>Total Tweets</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="box">
+                <i class="fa fa-frown-o fa-fw danger"></i>
+                <div class="info">
+                  <h3 style="font-color: #fff">{{ student.number_of_n_tweets }}</h3> <span>Tweets</span>
+                  <p>Negative Tweets</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="box">
+                <i class="fa fa-smile-o fa-fw success"></i>
+                <div class="info">
+                  <h3>{{ p_tweet }}</h3> <span>Tweets</span>
+                  <p>Positive Tweets</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      
+      <section class="charts">
+        <div class="container-fluid">
+          <div class="row">
+
+            <div class="col-md-6">
+              <div class="chart-container" >
+                <h3>Negative Tweets Overtime</h3>
+                <!-- <div id="piechart" ></div> -->
+                  <canvas id="main_line_chart_detail"></canvas>
+            </div>
+            </div>
+
+            <div class="col-md-6" style="overflow: scroll; height: 40vh">
+              <div class="chart-container" >
+                <h3>Recent Tweets</h3>
+                <div id="tweets" class="tabcontent">
+                    <div class="container-fluid">
+                      <div class="row" style="margin-top: 3vh">
+                    
+                      <div class="hidden-xs col-md-1" >	
+                          <h5>Index</h5>
+                      </div>	
+                        <div class="col-xs-6 col-md-6" >
+                          <h5>Text</h5>
+                        </div>
+                        <div class="col-xs-3 col-md-3" >
+                          <h5>Date</h5>
+                        </div>
+                        <div class="col-xs-2 col-md-2" >
+                          <h5>Status</h5>
+                        </div>
+                      </div>
+              
+                      {% for tweet in tweets %}
+                      <div class="row" style="margin-top: 1vh">
+                       
+                        <div class="hidden-xs col-md-1" >	
+                          <h5 style="color: #fff">{{ forloop.counter }}</h5>
+                        </div>	
+                        <div class="col-xs-6 col-md-6" >
+                          <p style="margin-top: 1vh;">{{tweet.text}}</p>
+                        </div>
+                        <div class="col-xs-3 col-md-3" >
+                          <p style="margin-top: 1vh; color: #fff">{{tweet.posted_date|date:'d-m-Y' }}</p>
+                        </div>
+                        <div class="col-xs-2 col-md-2" >
+                          {% if tweet.text_status %}
+                            <p style="margin-top: 1vh; color: #67cf5d">Neutral</p>
+                          {% else %}
+                            <p style="margin-top: 1vh; color: #e05454">Depressed</p>
+                          {% endif %}
+                        </div>
+                      </div>
+                      {% endfor %}
+                    </div>
+                    
+                  </div>
+               
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+      <section class="charts" style="overflow: scroll; height: 100vh">
+          <div class="container-fluid">
+              <div class="grid grid--effect-vega">
+                  {% for tweet in tweets  %}
+                  {% if tweet.media %}
+                    <a href={{tweet.media}} class="grid__item grid__item--c1" style="overflow: scroll; height: 20vh">
+                      <div class="stack">
+                        <div class="stack__figure">
+                          <img class="stack__img" src={{tweet.media}} alt="Image" style="overflow: scroll; height: 50vh; "/>
+                        </div>
+                      </div>
+                
+                      <div class="grid__item-caption" style="margin-top: 2vh">
+                        
+                        <div class="column column--left" style="margin-top: 1vh">
+                          <span class="column__text" >Posted date</span>
+                          <span class="column__text" style="margin-top: 1vh"> ----- {{ tweet.posted_date|date:'d-m-Y' }}</span>
+
+                         
+                        </div>             
+                        <div class="column column--right">
+                            {% if tweet.media_status %}
+                            <span class="column__text_false" style="margin-top: 1vh">Depressed</span>
+                          {% else %}
+                            <span class="column__text" style="margin-top: 1vh">Depressed</span>
+                          {% endif %}
+                          {% if tweet.media_status %}
+                            <span class="column__text_false" style="margin-top: 1vh">/ false</span>
+                          {% else %}
+                            <span class="column__text " style="margin-top: 1vh"> ----- true</span>
+                          {% endif %}
+                        </div>
+        
+                        
+                    </div>
+                  </a>
+                {% endif %}
+                {% endfor %}
+              </div>
+          </div>
+            
+        </section>
+      
+  
+
+    
+
+      
+
+      
+        
+ 
+  
+  <script src='http://code.jquery.com/jquery-latest.js'></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.js"></script>
+      <script src="{% static 'dashboard/js_dashboard/test.js' %}"></script>
+
+  <script src="{% static 'dashboard/js_dashboard/main.js' %}"></script>
+  <script src="{% static 'dashboard/js_dashboard/test.js' %}"></script>
+
+  <script>
+      var endpoint = '/api/chart/data/{{ student.pk }}'
+      var data = []
+      var labels = []
+  
+      $.ajax({
+      method: "GET",
+      url: endpoint,
+      success: function(data){
+        var ctx_l = document.getElementById('main_line_chart_detail').getContext('2d');
+      var myLineChart = new Chart(ctx_l, {
+      type: 'line',
+      label: data.l_labels,
+      data: {
+        labels: data.l_labels,
+        datasets: [{
+          label: '%',
+          data: data.l_data,
+          borderColor: "#f1d51d",
+          fill: true,
+          backgroundColor: '#dbdbdb28',
+          pointBorderColor: "#fff",
+          pointBackgroundColor: "#fff",
+          hoverBorderColor: "#fff",
+          hoverBackgroundColor: "#f1d51d",
+          pointRadius: 7,
+          pointHoverRadius: 5,
+        }]
+      },
+      options: {
+        legend: {
+          labels: {
+            fontColor: "white",
+            fontSize: 12
+          }
+        },
+        title: {
+          display: true,
+          text: 'Percentage of negative tweets over time',
+          fontColor: '#fff',
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              fontColor: "white",
+              fontSize: 12,
+              // stepSize: 1,
+              borderColor: "white",
+            
+            }, gridLines: {
+              display: false,
+            },
+          }, 
+        ],
+          xAxes: [{
+            ticks: {
+              fontColor: "white",
+              fontSize: 12,
+              // stepSize: 1,
+            },gridLines: {
+              display: false,
+            },
+          }]
+        }
+      }
+      });
+  
+          
+        }
+      })
+  
+    </script>
+
+</body>
+</html>

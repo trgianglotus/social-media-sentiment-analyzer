@@ -1,0 +1,14 @@
+{% load static %}
+<html>
+    <head>
+        <!--[if lte IE 8]>
+            <script src="{% static 'js/excanvas.js' %}"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+        <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+        <canvas id="myChart" width="50" height="50"></canvas>
+        <script type="text/javascript" src="{% static 'dashboard/chart.js' %}"></script>
+    </body>
+</html>

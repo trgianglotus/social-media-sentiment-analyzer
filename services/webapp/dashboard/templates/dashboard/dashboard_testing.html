@@ -1,0 +1,237 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <script src="{% static 'dashboard/js/test.js' %}"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Droid+Sans" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/main.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/test.css' %}">
+
+		
+  </head>
+
+  <style>
+  
+
+  </style>
+  
+  <body>
+    <aside class="side-nav" id="show-side-navigation1">
+      <i class="fa fa-bars close-aside hidden-sm hidden-md hidden-lg" data-close="show-side-navigation1"></i>
+        
+        <div class="heading">
+          <img src="images/mayur.jpg" alt="">
+          <div class="info">
+            <h3><a href="#">@Mayursatav</a></h3>
+            <p>Mayur Satav</p>
+          </div>
+        </div>
+      
+      <ul class="categories">
+
+        <li><i class="fa fa-home fa-fw" aria-hidden="true"></i><a href="index.html"> Home </a></li>
+
+        <li><i class="fa fa-info-circle fa-fw"></i><a href="#"> About </a></li>
+        
+        <li><i class="fa fa-download fa-fw"></i><a href="#"> Download </a>
+          <ul class="side-nav-dropdown">
+            <li><a href="#">Lorem ipsum</a></li>
+            <li><a href="#">ipsum dolor</a></li>
+            <li><a href="#">dolor ipsum</a></li>
+            <li><a href="#">amet consectetur</a></li>
+            <li><a href="#">ipsum dolor sit</a></li>
+          </ul>
+        </li>
+        
+      </ul>
+    </aside>
+
+    <section id="contents">
+      
+      <div class="welcome">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="content">
+                <h2>Welcome to Dashboard</h2>
+                <p>Sentiment Analysis</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section class="statistics">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="box">
+                <i class="fa fa-twitter fa-fw bg-primary"></i>
+                <div class="info">
+                  <h3>1,245</h3> <span>Tweets</span>
+                  <p>Total Tweets</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="box">
+                <i class="fa fa-frown-o fa-fw danger"></i>
+                <div class="info">
+                  <h3>34</h3> <span>Tweets</span>
+                  <p>Negative Tweets</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="box">
+                <i class="fa fa-smile-o fa-fw success"></i>
+                <div class="info">
+                  <h3>5,245</h3> <span>Tweets</span>
+                  <p>Positive Tweets</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <section class="charts">
+        <div class="container-fluid">
+          <div class="row">
+
+            <div class="col-md-6">
+              <div class="chart-container" >
+                <h3>Overall Performance</h3>
+                <div id="piechart" ></div>
+                <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+                <script type="text/javascript" src="{% static 'dashboard/js/piechart.js' %}"></script>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="chart-container">
+                <h3>Overall Performance</h3>
+                <div id = "colchart" style = "width: 550px; height: 400px; margin: 0 auto"></div>
+                <script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
+                <script type = "text/javascript" src="javascript/colchart.js"></script>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <section class='statis text-center'>
+        <div class="container-fluid">
+          <div class="row">
+
+            <div class="col-md-3">
+              <div class="box bg-primary">
+                  <i class="fa fa-intersex"></i>
+                  <h3>True</h3>
+                  <p class="lead">Bipolarity</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="box danger">
+                <i class="fa fa-user-o"></i>
+                <h3>False</h3>
+                <p class="lead">Negativity</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="box warning">
+                <i class="fa fa-moon-o"></i>
+                <h3>True</h3>
+                <p class="lead">Night Activity</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="box success">
+                <i class="fa fa-handshake-o"></i>
+                <h3>False</h3>
+                <p class="lead">Self harm</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <section class="charts">
+        <div class="container-fluid">
+          <div class="row">
+
+            <div class="col-md-6">
+              <div class="chart-container" >
+                <h3>Recent Tweets</h3>
+                <p>this is Tweet 1 </p>
+                <p>this is Tweet 2 </p>
+                <p>this is Tweet 3 </p>
+                <p>this is Tweet 4 </p>
+                <p>this is Tweet 5 </p>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="chart-container">
+                <h3>Interest / Following</h3>
+                <p>this is interest 1 </p>
+                <p>this is interest 2 </p>
+                <p>this is interest 3 </p>
+                <p>this is interest 4 </p>
+                <p>this is interest 5 </p>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <section class="widecharts" >
+        <div class="welcome">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="content" >
+                  <h2>Geo Chart</h2>
+                  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+                  <div id="regions_div" style="width: 100%; height: 500px;"></div>
+                  <script src="javascript/geochart.js"></script>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      
+        
+    <section class="chrt3">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-9">
+            <div class="chart-container">
+              <canvas id="chart3" width="100%"></canvas>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="box">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </section>
+  <script src='http://code.jquery.com/jquery-latest.js'></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.js"></script>
+  <script src="{% static 'dashboard/js/main.js' %}"></script>
+</body>
+</html>

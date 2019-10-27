@@ -1,0 +1,96 @@
+{% load static %}
+{% load bootstrap3 %}
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+	<head>
+		{% bootstrap_css %}
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="Item hover effects that reveal a colored stack behind the hovered item" />
+		<meta name="keywords" content="hover effect, reveal, hover, css, animations, anime.js, javascript, motion, ux" />
+		<meta name="author" content="Codrops" />
+		<link rel="shortcut icon" href="favicon.ico">
+		<link href="https://fonts.googleapis.com/css?family=Overpass+Mono:400,700" rel="stylesheet">
+		
+		<link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/normalize.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/demo.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/demo_search.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/style1.css' %}">
+		
+		<script src="{% static 'dashboard/js/test.js' %}"></script>
+		
+		<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"> -->
+		<script>document.documentElement.className ='js';</script>
+		<style>
+			.nav-tabsx > li {
+				float:none;
+				display:inline-block;
+				zoom:1;
+				border: 0px;
+				margin-right: 2em;
+				padding-left: 0.5em;
+				padding-right: 0.5em;
+			}
+
+			.nav-tabsx > li > a {
+				float:none;
+				display:inline-block;
+				zoom:1;
+			}
+
+			.nav-tabsx > li > a:hover {
+				float:none;
+				display:inline-block;
+				zoom:1;
+				color: rgb(230, 43, 43);
+			}
+
+			.nav-tabsx {
+				text-align:center;
+
+			}
+
+			/* Style the buttons inside the tab */
+			.nav-tabsx > li > button {
+				background: rgba(255, 0, 0, 0);
+				color: rgba(144, 144, 144, 0.822);
+				float: none;
+				border: none;
+				outline: none;
+				cursor: pointer;
+				padding: 14px 16px;
+				transition: 0.3s;
+				font-size: 17px;
+			}
+
+			/* Change background color of buttons on hover */
+			.tab button:hover {
+				background-color: rgba(221, 221, 221, 0);
+				
+			}
+
+			.nav-tabsx > li > button.active {
+				background-color: rgba(204, 204, 204, 0);
+				color: white;
+			}
+
+			.tabcontent {
+			}
+
+		</style>
+	</head>
+	<body class="demo-1">
+		<main>
+            <section>
+                <div class="phone_container">
+                    <h1 id='enter_phone'>Enter your phone number to continue</h1>
+                    <form class="phone_number" method="POST" action="{% url 'enter-phone' %}">
+                        {% csrf_token %}
+                        <input class="phone_input" name="phone" placeholder="+65 1234567" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+                    </form>
+                </div>
+            </section>
+		</main>
+	</body>
+</html>

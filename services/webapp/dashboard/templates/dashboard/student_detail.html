@@ -1,0 +1,268 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block bodycontent %}
+
+<section class=''>
+		<div class='container-fluid'>
+			<ul class="nav nav-tabsx " >
+				<li class="active" id="myTab">
+					<button class="tablinks active" onclick="openCity(event, 'statistics')">Summary</button>
+				</li>
+				<li>
+					<button class="tablinks" onclick="openCity(event, 'tweets')">Tweets</button>
+				</li>
+				<li>
+					<button class="tablinks" onclick="openCity(event, 'media')">Media</button>
+				</li>
+				<li>
+					<button class="tablinks" onclick="openCity(event, 'settings')">Settings</button>
+				</li>
+			</ul>
+		</div>	  
+		
+		<div id="statistics" class="tabcontent">
+				<div class="container-fluid">
+						<div class="row" style="margin-top: 7vh">
+							<div class="col-xs-1 col-sm-1 col-md-1" ></div>
+						<div class="col-md-3" >	
+							<h4></h4>
+						</div>
+						<div class="col-xs-9 col-sm-6 col-md-3" >
+							<p>Student name</p>
+							<p>Twitter account</p>
+
+						</div>
+						<div class="col-xs-2 col-md-2" >	
+							<p>{{ student.name }}</p>
+							<a href='https://twitter.com/{{ student.twitter_account}}' style="color: rgb(17, 168, 255)">{{ student.twitter_account}}</a>
+						</div>
+							
+						</div>
+						<div class="row" style="margin-top: 7vh">
+								<div class="col-xs-1"></div>
+								<div class="col-md-3" >	
+									<h4></h4>
+								</div>
+								<div class="col-xs-9 col-sm-6 col-md-3" >
+									<p class="symtomp">Bipolarity</p>
+									<p class="symtomp">Late night activities</p>
+									<p class="symtomp">Consistent negativity</p>
+									<p class="symtomp">Signs of self-harm</p>
+								</div>
+								<div class="col-xs-2 col-md-2" >
+									<p>{{ student.bipolarity }}</p>	
+									<p>{{ student.timing }}</p>	
+									<p>{{ student.consistent_negativity }}</p>	
+									<p>{{ student.suicidal }}</p>	
+								</div>	
+						</div>
+						<div class="row" style="margin-top: 12vh">
+							<div class="col-xs-1 col-sm-1 col-md-1 invisible" >.</div>
+								<div class="col-md-2" style="margin-right: 6vw;">	
+									<h4></h4>
+								</div>
+			
+							<div class="col-md-5 chart-container">
+								<canvas id="main_line_chart_detail"></canvas>
+							</div>
+						</div>
+
+						<div class="row" style="margin-top: 12vh">
+								<div class="col-xs-1 col-sm-1 col-md-1" ></div>
+									<div class="col-md-3" >	
+										<h4></h4>
+									</div>
+
+							<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+							<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+						</div>
+					</div>
+		</div>
+		<div id="tweets" class="tabcontent">
+			<div class="container-fluid">
+				<div class="row" style="margin-top: 3vh">
+				<div class="hidden-xs col-md-2" >	
+				
+				</div>	
+				<div class="hidden-xs col-md-1" >	
+						<h5>Index</h5>
+				</div>	
+					<div class="col-xs-6 col-md-4" >
+						<h5>Text</h5>
+					</div>
+					<div class="col-xs-3 col-md-2" >
+						<h5>Date</h5>
+					</div>
+					<div class="col-xs-2 col-md-2" >
+						<h5>Status</h5>
+					</div>
+				</div>
+
+				{% for tweet in tweets %}
+				<div class="row" style="margin-top: 1vh">
+					<div class="hidden-xs col-md-2" ></div>
+					<div class="hidden-xs col-md-1" >	
+						<h5 style="color: #fff">{{ forloop.counter }}</h5>
+					</div>	
+					<div class="col-xs-6 col-md-4" >
+						<p style="margin-top: 1vh;">{{tweet.text}}</p>
+					</div>
+					<div class="col-xs-3 col-md-2" >
+						<p style="margin-top: 1vh; color: #fff">{{tweet.posted_date|date:'d-m-Y' }}</p>
+					</div>
+					<div class="col-xs-2 col-md-2" >
+						{% if tweet.text_status %}
+							<p style="margin-top: 1vh; color: #67cf5d">Neutral</p>
+						{% else %}
+							<p style="margin-top: 1vh; color: #e05454">Depressed</p>
+						{% endif %}
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+			
+		</div>
+		<div id="media" class="tabcontent">
+				<div class="grid grid--effect-vega">
+        
+						{% for tweet in tweets  %}
+						{% if tweet.media %}
+							<a href={{tweet.media}} class="grid__item grid__item--c1">
+								<div class="stack">
+									<div class="stack__figure">
+										<img class="stack__img" src={{tweet.media}} alt="Image"/>
+									</div>
+								</div>
+					
+								<div class="grid__item-caption" style="margin-top: 2vh">
+									
+									<div class="column column--left" style="margin-top: 1vh">
+										<span class="column__text" >Posted date</span>
+										{% if tweet.media_status %}
+											<span class="column__text_false" style="margin-top: 1vh">Depressed</span>
+										{% else %}
+											<span class="column__text" style="margin-top: 1vh">Depressed</span>
+										{% endif %}
+										
+									</div>
+					
+								<div class="column column--right">
+									<span class="column__text" style="margin-top: 1vh">{{ tweet.posted_date|date:'d-m-Y' }}</span>
+									{% if tweet.media_status %}
+										<span class="column__text_false" style="margin-top: 1vh">false</span>
+									{% else %}
+										<span class="column__text " style="margin-top: 1vh">true</span>
+									{% endif %}
+								</div>
+
+								<div class="column column--right">
+										<span class="column__text" style="margin-top: 1vh">{{ tweet.posted_date|date:'d-m-Y' }}</span>
+										{% if tweet.media_status %}
+											<span class="column__text_false" style="margin-top: 1vh">false</span>
+										{% else %}
+											<span class="column__text " style="margin-top: 1vh">true</span>
+										{% endif %}
+								</div>
+							</div>
+						</a>
+					{% endif %}
+					{% endfor %}
+				</div>
+		</div>
+		<div id="settings" class="tabcontent">
+				<div class='row' style="margin-top: 7vh">
+						<div class="col-xs-1 col-sm-2 col-md-1 invisible">.</div>
+						<div class="col-md-3" ><h4></h4></div>
+						<div class="col-xs-9 col-sm-6 col-md-4" >
+								<h3>Delete</h3>
+						</div>
+				</div>
+				<div class='row' style="margin-top: 2vh">
+					<div clas='col-md-2'>
+							<div class="col-xs-1 col-sm-2 col-md-1 invisible" >.</div>
+							<div class="col-md-3" ><h4></h4></div>
+							
+							<div class="col-xs-4 col-sm-4 col-md-3" >
+								<a href="{% url 'delete-student' student.pk %}" id='change_number' class="btn delete_info">Delete student permanently</a>
+							</div>
+					</div>
+	
+				</div>	
+		</div>
+	<script>
+		var endpoint = '/api/chart/data/{{ student.pk }}'
+		var data = []
+		var labels = []
+
+		$.ajax({
+		method: "GET",
+		url: endpoint,
+		success: function(data){
+			var ctx_l = document.getElementById('main_line_chart_detail').getContext('2d');
+		var myLineChart = new Chart(ctx_l, {
+		type: 'line',
+		label: data.l_labels,
+		data: {
+			labels: data.l_labels,
+			datasets: [{
+				label: '%',
+				data: data.l_data,
+				borderColor: "#f1d51d",
+				fill: true,
+				backgroundColor: '#dbdbdb28',
+				pointBorderColor: "#fff",
+				pointBackgroundColor: "#fff",
+				hoverBorderColor: "#fff",
+				hoverBackgroundColor: "#f1d51d",
+				pointRadius: 7,
+				pointHoverRadius: 5,
+			}]
+		},
+		options: {
+			legend: {
+				labels: {
+					fontColor: "white",
+					fontSize: 12
+				}
+			},
+			title: {
+				display: true,
+				text: 'Percentage of negative tweets over time',
+				fontColor: '#fff',
+			},
+			scales: {
+				yAxes: [{
+					ticks: {
+						fontColor: "white",
+						fontSize: 12,
+						// stepSize: 1,
+						borderColor: "white",
+					
+					}, gridLines: {
+						display: false,
+					},
+				}, 
+			],
+				xAxes: [{
+					ticks: {
+						fontColor: "white",
+						fontSize: 12,
+						// stepSize: 1,
+					},gridLines: {
+						display: false,
+					},
+				}]
+			}
+		}
+		});
+
+				
+			}
+		})
+
+	</script>
+	<script>document.getElementById("tweets").style.display = "none";</script>
+	<script>document.getElementById("media").style.display = "none";</script>
+	<script>document.getElementById("settings").style.display = "none";</script>
+</section>
+{% endblock bodycontent %}

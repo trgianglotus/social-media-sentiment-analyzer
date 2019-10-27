@@ -1,0 +1,829 @@
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Dashboard - {{ student.name }}</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Droid+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'dashboard/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/css/test.css' %}">
+    <link href="https://fonts.googleapis.com/css?family=Overpass+Mono:400,700" rel="stylesheet">
+		
+		<link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/normalize.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/demo.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/demo_search.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/style1.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'dashboard/css/update.css' %}">
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="{% static 'dashboard/js/charts.js' %}"></script>
+    
+  </head>
+  <style>
+  </style>
+  <body>
+      <svg class="hidden">
+          <symbol id="icon-arrow" viewBox="0 0 24 24">
+              <title>arrow</title>
+              <polygon points="6.3,12.8 20.9,12.8 20.9,11.2 6.3,11.2 10.2,7.2 9,6 3.1,12 9,18 10.2,16.8 "/>
+            </symbol>
+        <symbol id="icon-drop" viewBox="0 0 24 24">
+          <title>drop</title>
+          <path d="M12,21c-3.6,0-6.6-3-6.6-6.6C5.4,11,10.8,4,11.4,3.2C11.6,3.1,11.8,3,12,3s0.4,0.1,0.6,0.3c0.6,0.8,6.1,7.8,6.1,11.2C18.6,18.1,15.6,21,12,21zM12,4.8c-1.8,2.4-5.2,7.4-5.2,9.6c0,2.9,2.3,5.2,5.2,5.2s5.2-2.3,5.2-5.2C17.2,12.2,13.8,7.3,12,4.8z"/><path d="M12,18.2c-0.4,0-0.7-0.3-0.7-0.7s0.3-0.7,0.7-0.7c1.3,0,2.4-1.1,2.4-2.4c0-0.4,0.3-0.7,0.7-0.7c0.4,0,0.7,0.3,0.7,0.7C15.8,16.5,14.1,18.2,12,18.2z"/>
+        </symbol>
+        <symbol id="icon-search" viewBox="0 0 24 24">
+            <title>search</title>
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </symbol>
+        <symbol id="icon-cross" viewBox="0 0 24 24">
+          <title>cross</title>
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </symbol>
+      </svg>
+    <aside class="side-nav" id="show-side-navigation1">
+      <i class="fa fa-bars close-aside hidden-sm hidden-md hidden-lg" data-close="show-side-navigation1"></i>
+        
+        <div class="heading">
+          <div class="info">
+              <form action="{% url 'add-student' %}" method="POST" name="Input">
+                  {% csrf_token %}
+                  <input type="text" name="name" id="add-student" placeholder="Add student account">
+                </form>
+          </div>
+        </div>
+      
+      <ul class="categories">
+
+        <li><i class="fa fa-home fa-fw" aria-hidden="true"></i><a href="{% url 'classifier' %}"> Simple view </a></li>        
+        <li><i class="fa fa-gear fa-fw"></i><a href="#"> Settings </a>
+          <ul class="side-nav-dropdown">
+            <li><a href="#">Delete student</a></li>
+            <li>
+                <a id='change_number' class="change_info">Whatsapp number</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </aside>
+
+    <a href="#"><i data-show='show-side-navigation1' class="fa fa-bars show-side-btn"></i></a>
+
+    <section id="contents">
+      
+      <div class="welcome">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="content">
+                <h2>Welcome to Stretection</h2>
+                <!-- <div class="search-wrap">
+                    <button id="btn-search" class="btn btn--search"><svg class="icon icon--search"><use xlink:href="#icon-search"></use></svg></button>
+                </div> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section class='statis text-center'>
+        <div class="container-fluid">
+          <div class="row">
+              
+            <div class="col-md-3">
+              <div class="box bg-primary">
+                  <i class="fa fa-arrows-v"></i>
+                  <h3>{{ summary.bipo }}</h3>
+                  <p class="lead">Bipolarity</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="box danger">
+                <i class="fa fa-minus"></i>
+                <h3 style="color: #fff">{{ summary.nega }}</h3>
+                <p class="lead">Negativity</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="box warning">
+                <i class="fa fa-moon-o"></i>
+                <h3>{{ summary.night }}</h3>
+                <p class="lead">Night Actitity</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="box success">
+                <i class="fa fa-bomb"></i>
+                <h3>{{ summary.s_harm }}</h3>
+                <p class="lead">Self Harm</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+      <section class="statistics">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="box">
+                <i class="fa fa-twitter fa-fw bg-primary"></i>
+                <div class="info">
+                  <h3 h1>{{ summary.t_tweet }}</h3> <span>Tweets</span>
+                  <p>Total Tweets</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="box">
+                <i class="fa fa-frown-o fa-fw danger"></i>
+                <div class="info">
+                  <h3 style="font-color: #fff">{{ summary.n_tweet }}</h3> <span>Tweets</span>
+                  <p>Negative Tweets</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="box">
+                <i class="fa fa-smile-o fa-fw success"></i>
+                <div class="info">
+                  <h3>{{ summary.p_tweet }}</h3> <span>Tweets</span>
+                  <p>Positive Tweets</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="charts">
+        <div class="container-fluid">
+          <div class="row">
+
+            <div class="col-md-6">
+              <div class="chart-container" >
+                <h3>Negative Tweets Overtime</h3>
+                <!-- <div id="piechart" ></div> -->
+                  <canvas id="main_line_chart_detail" style="min-height: 2px;"></canvas>
+            </div>
+            </div>
+            <div class="col-md-6" >
+                <div class="chart-container">
+                  <h3>Age and self harm</h3>
+                  <script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
+                  <script type = "text/javascript">google.charts.load('current', {packages: ['corechart']});</script>
+                  <div id = "container" style = "width: 550; height: 256px; margin: 0 auto;"></div>
+                  <!-- <script language = "JavaScript" src="{% static 'dashboard/js_dashboard/agetable.js' %}"></script> -->
+                  <!-- <script src="{% static 'dashboard/js_dashboard/agetable.js' %}"></script> -->
+                  <script>
+                    google.charts.load('current', {'packages':['corechart']});
+                    google.charts.setOnLoadCallback(drawChart);
+                    function drawChart() {
+                        // Define the chart to be drawn.
+                        var data = google.visualization.arrayToDataTable([
+                          ['Age', 'percentage'],
+                          ['11-15',  1],
+                          ['16-20',  80],
+                          ['21-25',  10],
+                          ['26-30',  15],
+                        ]);
+
+                        var options = {title: 'Age and Self Harm (in percentage)','backgroundColor': '#313348','titleTextStyle': {
+                            'color': 'White'},'hAxis': {'textStyle': {'color': 'white'},'titleTextStyle': {'color': 'white'}},'vAxis': {'textStyle': {'color': 'white'},
+                            'titleTextStyle': {
+                                'color': 'white'}
+                        },'legend': {'textStyle': {'color': 'white'}},'chartArea': {'width': 200, 'height': 200}}; 
+
+                        // Instantiate and draw the chart.
+                        var chart = new google.visualization.ColumnChart(document.getElementById('container'));
+                        chart.draw(data, options);
+                    }
+                    google.charts.setOnLoadCallback(drawChart);
+                  </script>
+
+              </div>
+            </div>
+           
+
+          </div>
+        </div>
+        <section class="charts">
+            <div class="container-fluid">
+              <div class="row">
+                  <div class="col-md-12" style="overflow: scroll; height: 40vh">
+                      <div class="chart-container" >
+                        <h3>Recent Tweets</h3>
+                        <div id="tweets" class="tabcontent">
+                            <div class="container-fluid">
+                              <div class="row" style="margin-top: 3vh">
+                            
+                              <div class="hidden-xs col-md-2" >	
+                                  <h5>Student</h5>
+                              </div>	
+                                <div class="col-xs-6 col-md-8" >
+                                  <h5>Text</h5>
+                                </div>
+                                <!-- <div class="col-xs-3 col-md-3" >
+                                  <h5>Date</h5>
+                                </div> -->
+                                <div class="col-xs-2 col-md-2" >
+                                  <h5>Status</h5>
+                                </div>
+                              </div>
+                      
+                              {% for tweet in tweets %}
+                              <div class="row" style="margin-top: 1vh">
+                               
+                                <div class="hidden-xs col-md-2" >	
+                                  <h5 style="color: #fff">{{ tweet.student.name }}</h5>
+                                </div>	
+                                <div class="col-xs-6 col-md-8" >
+                                  <p style="margin-top: 1vh;">{{tweet.text}}</p>
+                                </div>
+                                <!-- <div class="col-xs-3 col-md-3" >
+                                  <p style="margin-top: 1vh; color: #fff">{{tweet.posted_date|date:'d-m-Y' }}</p>
+                                </div> -->
+                                <div class="col-xs-2 col-md-2" >
+                                  {% if tweet.text_status %}
+                                    <p style="margin-top: 1vh; color: #67cf5d">Neutral</p>
+                                  {% else %}
+                                    <p style="margin-top: 1vh; color: #e05454">Depressed</p>
+                                  {% endif %}
+                                </div>
+                              </div>
+                              {% endfor %}
+                            </div>
+                            
+                          </div>
+                        <!-- <script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
+                        <script type = "text/javascript">google.charts.load('current', {packages: ['table']});</script>
+                        <div id = "table_div" style = "width: 550px; height: 400px; margin: 0 auto;"></div>
+                        <script language = "JavaScript" src="javascript/tablechart.js" ></script>
+                        <script src="{% static 'dashboard/js/charts.js' %}"></script> -->
+                      </div>
+                    </div>
+                
+    
+                
+    
+              </div>
+            </div>
+          </section>
+      </section>
+
+      
+      <div id="students" class="tabcontent" style="background: #313348; height: 80vh; overflow: scroll; margin-top: 3vh; ">
+          <h4 style="margin: 1.7vw">All students</h4>
+				  {% if not_found %}
+					<div class="grid grid--effect-vega">
+						<h3 style='text-align: center;'>Add student account to see prediction results</h3>
+					</div>
+				{% else %}
+					{% for student1, student2, student3 in three_students_groups %}
+						<div class="grid grid--effect-vega">
+							<a href="{% url 'student-detail' pk=student1.pk %}" class="grid__item grid__item--c1">
+								<div class="stack">
+									<div class="stack__figure">
+										<img class="stack__img" src="{% static student1.wordcloud %}" alt="Image"/>
+									</div>
+								</div>
+								<div class="grid__item-caption">
+									<h3 class="grid__item-title">{{ student1.name }}</h3>
+									<div class="column column--left">
+										{% if student1.bipolarity %}
+											<span class="column__text ">Bipolarity</span>
+										{% else %}
+											<span class="column__text_false ">Bipolarity</span>
+										{% endif %}
+			
+										{% if student1.timing %}
+											<span class="column__text ">Night activity</span>
+										{% else %}
+											<span class="column__text_false ">Night activity</span>
+										{% endif %}
+			
+										{% if student1.consistent_negativity %}
+											<span class="column__text ">Negativity</span>
+										{% else %}
+											<span class="column__text_false ">Negativity</span>
+										{% endif %}
+			
+										{% if student1.suicidal %}
+											<span class="column__text ">Self-harm</span>
+										{% else %}
+											<span class="column__text_false ">Self-harm</span>
+										{% endif %}
+									</div>
+									<div class="column column--right">
+										{% if student1.bipolarity %}
+											<span class="column__text">{{ student1.bipolarity }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student1.bipolarity }}</span>
+										{% endif %}
+			
+										{% if student1.timing %}
+											<span class="column__text ">{{ student1.timing }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student1.timing }}</span>
+										{% endif %}
+			
+										{% if student1.consistent_negativity %}
+											<span class="column__text ">{{ student1.consistent_negativity }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student1.consistent_negativity }}</span>
+										{% endif %}
+			
+										{% if student1.suicidal %}
+											<span class="column__text ">{{ student1.suicidal }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student1.suicidal }}</span>
+										{% endif %}
+									</div>
+								</div>
+							</a>
+							<a href="{% url 'student-detail' pk=student2.pk %}" class="grid__item grid__item--c2">
+									<div class="stack">
+										<!-- <div class="stack__deco"></div>
+										<div class="stack__deco"></div>
+										<div class="stack__deco"></div>
+										<div class="stack__deco"></div> -->
+										<div class="stack__figure">
+											<img class="stack__img" src="{% static student2.wordcloud %}" alt="Image"/>
+										</div>
+									</div>
+									<div class="grid__item-caption">
+											
+									<h3 class="grid__item-title">{{ student2.name }}</h3>
+									<div class="column column--left">
+											{% if student2.bipolarity %}
+											<span class="column__text ">Bipolarity</span>
+										{% else %}
+											<span class="column__text_false ">Bipolarity</span>
+										{% endif %}
+			
+										{% if student2.timing %}
+											<span class="column__text ">Night activity</span>
+										{% else %}
+											<span class="column__text_false ">Night activity</span>
+										{% endif %}
+			
+										{% if student2.consistent_negativity %}
+											<span class="column__text ">Negativity</span>
+										{% else %}
+											<span class="column__text_false ">Negativity</span>
+										{% endif %}
+			
+										{% if student2.suicidal %}
+											<span class="column__text ">Self-harm</span>
+										{% else %}
+											<span class="column__text_false ">Self-harm</span>
+										{% endif %}
+									</div>
+			
+									<div class="column column--right">
+											{% if student2.bipolarity %}
+											<span class="column__text">{{ student2.bipolarity }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student2.bipolarity }}</span>
+										{% endif %}
+			
+										{% if student2.timing %}
+											<span class="column__text ">{{ student2.timing }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student2.timing }}</span>
+										{% endif %}
+			
+										{% if student2.consistent_negativity %}
+											<span class="column__text ">{{ student2.consistent_negativity }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student2.consistent_negativity }}</span>
+										{% endif %}
+			
+										{% if student2.suicidal %}
+											<span class="column__text ">{{ student2.suicidal }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student2.suicidal }}</span>
+										{% endif %}
+									</div>
+									</div>
+							</a>
+							<a href="{% url 'student-detail' pk=student3.pk %}" class="grid__item grid__item--c3">
+									<div class="stack">
+					
+										<div class="stack__figure">
+											<img class="stack__img" src="{% static student3.wordcloud %}" alt="Image"/>
+										</div>
+									</div>
+									<div class="grid__item-caption">
+										
+									<h3 class="grid__item-title">{{ student3.name }}</h3>
+									<div class="column column--left">
+										{% if student3.bipolarity %}
+											<span class="column__text">Bipolarity</span>
+										{% else %}
+											<span class="column__text_false ">Bipolarity</span>
+										{% endif %}
+			
+										{% if student3.timing %}
+											<span class="column__text ">Night activity</span>
+										{% else %}
+											<span class="column__text_false ">Night activity</span>
+										{% endif %}
+			
+										{% if student3.consistent_negativity %}
+											<span class="column__text ">Negativity</span>
+										{% else %}
+											<span class="column__text_false ">Negativity</span>
+										{% endif %}
+			
+										{% if student3.suicidal %}
+											<span class="column__text ">Self-harm</span>
+										{% else %}
+											<span class="column__text_false ">Self-harm</span>
+										{% endif %}
+									</div>
+			
+									<div class="column column--right">
+										{% if student3.bipolarity %}
+											<span class="column__text">{{ student3.bipolarity }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student3.bipolarity }}</span>
+										{% endif %}
+			
+										{% if student1.timing %}
+											<span class="column__text">{{ student3.timing }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student3.timing }}</span>
+										{% endif %}
+			
+										{% if student3.consistent_negativity %}
+											<span class="column__text">{{ student3.consistent_negativity }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student3.consistent_negativity }}</span>
+										{% endif %}
+			
+										{% if student3.suicidal %}
+											<span class="column__text ">{{ student3.suicidal }}</span>
+										{% else %}
+											<span class="column__text_false ">{{ student3.suicidal }}</span>
+										{% endif %}
+									</div>
+								</div>
+							</a>
+						</div>
+					{% endfor %}
+			
+					{% if two_remaining_students %}
+						{% for student1, student2 in less_than_three_groups %}
+							<div class="grid grid--effect-vega">
+								<a href="{% url 'student-detail' pk=student1.pk %}" class="grid__item grid__item--c1">
+									<div class="stack">
+										<!-- <div class="stack__deco"></div>
+										<div class="stack__deco"></div>
+										<div class="stack__deco"></div>
+										<div class="stack__deco"></div> -->
+										<div class="stack__figure">
+											<img class="stack__img" src="{% static student1.wordcloud %}" alt="Image"/>
+									</div>
+									</div>
+										<div class="grid__item-caption">
+											<h3 class="grid__item-title">{{ student1.name }}</h3>
+											<div class="column column--left">
+												{% if student1.bipolarity %}
+													<span class="column__text ">Bipolarity</span>
+												{% else %}
+													<span class="column__text_false ">Bipolarity</span>
+												{% endif %}
+			
+												{% if student1.timing %}
+													<span class="column__text ">Night activity</span>
+												{% else %}
+													<span class="column__text_false ">Night activity</span>
+												{% endif %}
+			
+												{% if student1.consistent_negativity %}
+													<span class="column__text ">Negativity</span>
+												{% else %}
+													<span class="column__text_false ">Negativity</span>
+												{% endif %}
+			
+												{% if student1.suicidal %}
+													<span class="column__text ">Self-harm</span>
+												{% else %}
+													<span class="column__text_false ">Self-harm</span>
+												{% endif %}
+											</div>
+											<div class="column column--right">
+												{% if student1.bipolarity %}
+													<span class="column__text">{{ student1.bipolarity }}</span>
+												{% else %}
+													<span class="column__text_false ">{{ student1.bipolarity }}</span>
+												{% endif %}
+			
+												{% if student1.timing %}
+													<span class="column__text ">{{ student1.timing }}</span>
+												{% else %}
+													<span class="column__text_false ">{{ student1.timing }}</span>
+												{% endif %}
+			
+												{% if student1.consistent_negativity %}
+													<span class="column__text ">{{ student1.consistent_negativity }}</span>
+												{% else %}
+													<span class="column__text_false ">{{ student1.consistent_negativity }}</span>
+												{% endif %}
+			
+												{% if student1.suicidal %}
+													<span class="column__text ">{{ student1.suicidal }}</span>
+												{% else %}
+													<span class="column__text_false ">{{ student1.suicidal }}</span>
+												{% endif %}
+											</div>
+										</div>
+								</a>
+								<a href="{% url 'student-detail' pk=student2.pk %}" class="grid__item grid__item--c2">
+										<div class="stack">
+											<!-- <div class="stack__deco"></div>
+											<div class="stack__deco"></div>
+											<div class="stack__deco"></div>
+											<div class="stack__deco"></div> -->
+											<div class="stack__figure">
+												<img class="stack__img" src="{% static student2.wordcloud %}" alt="Image"/>
+											</div>
+										</div>
+										<div class="grid__item-caption">
+												
+										<h3 class="grid__item-title">{{ student2.name }}</h3>
+										<div class="column column--left">
+												{% if student2.bipolarity %}
+												<span class="column__text ">Bipolarity</span>
+											{% else %}
+												<span class="column__text_false ">Bipolarity</span>
+											{% endif %}
+			
+											{% if student2.timing %}
+												<span class="column__text ">Night activity</span>
+											{% else %}
+												<span class="column__text_false ">Night activity</span>
+											{% endif %}
+			
+											{% if student2.consistent_negativity %}
+												<span class="column__text ">Negativity</span>
+											{% else %}
+												<span class="column__text_false ">Negativity</span>
+											{% endif %}
+			
+											{% if student2.suicidal %}
+												<span class="column__text ">Self-harm</span>
+											{% else %}
+												<span class="column__text_false ">Self-harm</span>
+											{% endif %}
+										</div>
+			
+										<div class="column column--right">
+												{% if student2.bipolarity %}
+												<span class="column__text">{{ student2.bipolarity }}</span>
+											{% else %}
+												<span class="column__text_false ">{{ student2.bipolarity }}</span>
+											{% endif %}
+			
+											{% if student2.timing %}
+												<span class="column__text ">{{ student2.timing }}</span>
+											{% else %}
+												<span class="column__text_false ">{{ student2.timing }}</span>
+											{% endif %}
+			
+											{% if student2.consistent_negativity %}
+												<span class="column__text ">{{ student2.consistent_negativity }}</span>
+											{% else %}
+												<span class="column__text_false ">{{ student2.consistent_negativity }}</span>
+											{% endif %}
+			
+											{% if student2.suicidal %}
+												<span class="column__text ">{{ student2.suicidal }}</span>
+											{% else %}
+												<span class="column__text_false ">{{ student2.suicidal }}</span>
+											{% endif %}
+										</div>
+									</div>
+								</a>
+							</div>
+						{% endfor %}	  
+					{% else %}
+						{% for student1 in less_than_three_groups %}
+							<div class="grid grid--effect-vega">
+									<a href="{% url 'student-detail' pk=student1.pk %}" class="grid__item grid__item--c1">
+										<div class="stack">
+											<!-- <div class="stack__deco"></div>
+											<div class="stack__deco"></div>
+											<div class="stack__deco"></div>
+											<div class="stack__deco"></div> -->
+											<div class="stack__figure">
+												<img class="stack__img" src="{% static student1.wordcloud %}" alt="Image"/>
+											</div>
+										</div>
+										<div class="grid__item-caption">
+											<h3 class="grid__item-title">{{ student1.name }}</h3>
+											<div class="column column--left">
+												{% if student1.bipolarity %}
+													<span class="column__text ">Bipolarity</span>
+												{% else %}
+													<span class="column__text_false ">Bipolarity</span>
+												{% endif %}
+			
+												{% if student1.timing %}
+													<span class="column__text ">Night activity</span>
+												{% else %}
+													<span class="column__text_false ">Night activity</span>
+												{% endif %}
+			
+												{% if student1.consistent_negativity %}
+													<span class="column__text ">Negativity</span>
+												{% else %}
+													<span class="column__text_false ">Negativity</span>
+												{% endif %}
+			
+												{% if student1.suicidal %}
+													<span class="column__text ">Self-harm</span>
+												{% else %}
+													<span class="column__text_false ">Self-harm</span>
+												{% endif %}
+											</div>
+											<div class="column column--right">
+												{% if student1.bipolarity %}
+													<span class="column__text">{{ student1.bipolarity }}</span>
+												{% else %}
+													<span class="column__text_false ">{{ student1.bipolarity }}</span>
+												{% endif %}
+			
+												{% if student1.timing %}
+													<span class="column__text ">{{ student1.timing }}</span>
+												{% else %}
+													<span class="column__text_false ">{{ student1.timing }}</span>
+												{% endif %}
+			
+												{% if student1.consistent_negativity %}
+													<span class="column__text ">{{ student1.consistent_negativity }}</span>
+												{% else %}
+													<span class="column__text_false ">{{ student1.consistent_negativity }}</span>
+												{% endif %}
+			
+												{% if student1.suicidal %}
+													<span class="column__text ">{{ student1.suicidal }}</span>
+												{% else %}
+													<span class="column__text_false ">{{ student1.suicidal }}</span>
+												{% endif %}
+											</div>
+										</div>
+									</a>		
+							</div>
+						{% endfor %}
+					{% endif %}
+				{% endif %}
+		</div>
+      
+    
+      <link href="https://fonts.googleapis.com/css?family=Be+Vietnam&display=swap" rel="stylesheet">
+      <script src='http://code.jquery.com/jquery-latest.js'></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.js"></script>
+      <script src="{% static 'dashboard/js/main.js' %}"></script>
+  
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+      <script src="{% static 'dashboard/js/demo1.js' %}"></script>
+      <script src="{% static 'dashboard/js/anime.min.js' %}"></script>
+      <script src="{% static 'dashboard/js/main.js' %}"></script>
+<script>
+		(function() {
+			[].slice.call(document.querySelectorAll('.grid--effect-vega > .grid__item')).forEach(function(stackEl) {
+				new VegaFx(stackEl);
+			});
+			[].slice.call(document.querySelectorAll('.grid--effect-castor > .grid__item')).forEach(function(stackEl) {
+				new CastorFx(stackEl);
+			});
+			[].slice.call(document.querySelectorAll('.grid--effect-hamal > .grid__item')).forEach(function(stackEl) {
+				new HamalFx(stackEl);
+			});
+			[].slice.call(document.querySelectorAll('.grid--effect-polaris > .grid__item')).forEach(function(stackEl) {
+				new PolarisFx(stackEl);
+			});
+			[].slice.call(document.querySelectorAll('.grid--effect-alphard > .grid__item')).forEach(function(stackEl) {
+				new AlphardFx(stackEl);
+			});
+			[].slice.call(document.querySelectorAll('.grid--effect-altair > .grid__item')).forEach(function(stackEl) {
+				new AltairFx(stackEl);
+			});
+			[].slice.call(document.querySelectorAll('.grid--effect-rigel > .grid__item')).forEach(function(stackEl) {
+				new RigelFx(stackEl);
+			});
+			[].slice.call(document.querySelectorAll('.grid--effect-canopus > .grid__item')).forEach(function(stackEl) {
+				new CanopusFx(stackEl);
+			});
+			[].slice.call(document.querySelectorAll('.grid--effect-pollux > .grid__item')).forEach(function(stackEl) {
+				new PolluxFx(stackEl);
+			});
+			[].slice.call(document.querySelectorAll('.grid--effect-deneb > .grid__item')).forEach(function(stackEl) {
+				new DenebFx(stackEl);
+			});
+		})();
+		</script>      
+    <script>
+      function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+      }
+    </script>
+  <script src='http://code.jquery.com/jquery-latest.js'></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.js"></script>
+      <script src="{% static 'dashboard/js_dashboard/test.js' %}"></script>
+      <script src="{% static 'dashboard/js/demo1.js' %}"></script>
+  <script src="{% static 'dashboard/js_dashboard/main.js' %}"></script>
+  <script src="{% static 'dashboard/js_dashboard/colchart.js' %}"></script>
+  <script src="{% static 'dashboard/js_dashboard/test.js' %}"></script>
+
+  <script>
+      var endpoint = '/api/chart/data/{{ student.pk }}'
+      var data = []
+      var labels = []
+  
+      $.ajax({
+      method: "GET",
+      url: endpoint,
+      success: function(data){
+        var ctx_l = document.getElementById('main_line_chart_detail').getContext('2d');
+      var myLineChart = new Chart(ctx_l, {
+      type: 'line',
+      label: data.l_labels,
+      data: {
+        labels: data.l_labels,
+        datasets: [{
+          label: '%',
+          data: data.l_data,
+          borderColor: "#f1d51d",
+          fill: true,
+          backgroundColor: '#dbdbdb28',
+          pointBorderColor: "#fff",
+          pointBackgroundColor: "#fff",
+          hoverBorderColor: "#fff",
+          hoverBackgroundColor: "#f1d51d",
+          pointRadius: 7,
+          pointHoverRadius: 5,
+        }]
+      },
+      options: {
+        legend: {
+          labels: {
+            fontColor: "white",
+            fontSize: 12
+          }
+        },
+        title: {
+          display: true,
+          text: 'Percentage of negative tweets over time',
+          fontColor: '#fff',
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              fontColor: "white",
+              fontSize: 12,
+              // stepSize: 1,
+              borderColor: "white",
+            
+            }, gridLines: {
+              display: false,
+            },
+          }, 
+        ],
+          xAxes: [{
+            ticks: {
+              fontColor: "white",
+              fontSize: 12,
+              // stepSize: 1,
+            },gridLines: {
+              display: false,
+            },
+          }]
+        }
+      }
+      });
+  
+          
+        }
+      })
+  
+    </script>
+
+</body>
+</html>
